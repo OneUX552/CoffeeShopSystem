@@ -1,0 +1,4 @@
+code,discount_percent,min_order_value,active
+WELCOME10,10.00,5.00,1
+COFFEE5,5.00,0.00,1
+VIP20,20.00,25.00,1

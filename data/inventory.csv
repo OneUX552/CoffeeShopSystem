@@ -1,0 +1,8 @@
+id,name,unit,current_stock,min_threshold,unit_cost
+1,Espresso Beans (Arabica),g,5000.00,500.00,0.03
+2,Whole Milk,ml,15000.00,2000.00,0.00
+3,Oat Milk (Barista),ml,8000.00,1500.00,0.01
+4,Vanilla Syrup,ml,2000.00,300.00,0.02
+5,Caramel Sauce,ml,1500.00,250.00,0.03
+6,Recyclable Cups (12oz),pcs,300.00,50.00,0.15
+7,Bakery Pastries,pcs,40.00,8.00,1.20

@@ -1,0 +1,12 @@
+id,name,category,price,description,available,recipe_count
+1,Espresso Double,0,2.75,Rich double shot of artisan espresso,1,2
+2,Caffe Americano,0,3.25,Espresso topped with hot water,1,2
+3,Classic Cafe Latte,0,4.50,Espresso with steamed milk & microfoam,1,3
+4,Cappuccino,0,4.25,Equal parts espresso steamed milk & foam,1,3
+5,Nitro Cold Brew,1,4.75,Slow-steeped craft cold brew infused with nitrogen,1,2
+6,Iced Caramel Macchiato,1,5.25,Espresso over vanilla milk & caramel drizzle,1,5
+7,Matcha Green Tea Latte,2,4.50,Ceremonial Japanese matcha whisked with milk,1,2
+8,Earl Grey Supreme Tea,2,3.50,Organic black tea with bergamot essence,1,1
+9,Almond Croissant,3,3.75,Freshly baked flaky butter croissant with almond cream,1,1
+10,Blueberry Scone,3,3.25,Tender bakery scone studded with wild blueberries,1,1
+11,Artisan Ceramic Mug,4,14.00,Handmade ceramic coffee mug with shop logo,1,0
