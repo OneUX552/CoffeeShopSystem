@@ -91,11 +91,21 @@ const char *menu_category_to_string(ItemCategory cat) {
 
 ItemCategory menu_string_to_category(const char *str) {
     if (!str) return CAT_HOT_COFFEE;
-    if (utils_strcasecmp(str, "Hot Coffee") == 0) return CAT_HOT_COFFEE;
-    if (utils_strcasecmp(str, "Iced Coffee") == 0) return CAT_ICED_COFFEE;
-    if (utils_strcasecmp(str, "Tea & Infusion") == 0 || utils_strcasecmp(str, "Tea") == 0) return CAT_TEA;
-    if (utils_strcasecmp(str, "Pastry & Bakery") == 0 || utils_strcasecmp(str, "Pastry") == 0) return CAT_PASTRY;
-    if (utils_strcasecmp(str, "Merchandise") == 0) return CAT_MERCH;
+    if (utils_strcasecmp(str, "Hot Coffee") == 0 || utils_strcasecmp(str, "hot_coffee") == 0 || utils_strcasecmp(str, "hot") == 0) {
+        return CAT_HOT_COFFEE;
+    }
+    if (utils_strcasecmp(str, "Iced Coffee") == 0 || utils_strcasecmp(str, "iced_coffee") == 0 || utils_strcasecmp(str, "iced") == 0) {
+        return CAT_ICED_COFFEE;
+    }
+    if (utils_strcasecmp(str, "Tea & Infusion") == 0 || utils_strcasecmp(str, "tea") == 0 || utils_strcasecmp(str, "infusion") == 0) {
+        return CAT_TEA;
+    }
+    if (utils_strcasecmp(str, "Pastry & Bakery") == 0 || utils_strcasecmp(str, "pastry") == 0 || utils_strcasecmp(str, "bakery") == 0) {
+        return CAT_PASTRY;
+    }
+    if (utils_strcasecmp(str, "Merchandise") == 0 || utils_strcasecmp(str, "merch") == 0) {
+        return CAT_MERCH;
+    }
     return CAT_HOT_COFFEE;
 }
 
