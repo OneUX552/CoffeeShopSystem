@@ -28,3 +28,7 @@ bool storage_save_customers(const char *filepath);
 bool storage_load_customers(const char *filepath);
 bool storage_save_coupons(const char *filepath);
 bool storage_load_coupons(const char *filepath);
+
+// Transaction logging
+bool storage_log_transaction(const Order *order, const char *filepath);
+void storage_print_transaction_history(const char *filepath);

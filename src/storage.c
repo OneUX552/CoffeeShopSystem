@@ -289,3 +289,79 @@ bool storage_load_coupons(const char *filepath) {
     fclose(fp);
     return true;
 }
+#include "payment.h"
+
+bool storage_log_transaction(const Order *order, const char *filepath) {
+    if (!order) return false;
+    storage_ensure_data_dir();
+
+    FILE *fp = fopen(filepath, "a");
+    if (!fp) return false;
+
+    // Log format: timestamp | order_id | cashier | phone | total | method | items
+    fprintf(fp, "%s|%d|%s|%s|%.2f|%s|",
+            order->timestamp,
+            order->order_id,
+            order->cashier_username,
+            strlen(order->customer_phone) > 0 ? order->customer_phone : "Walk-in",
+            order->total_amount,
+            payment_method_to_string(order->payment_method));
+
+    for (int i = 0; i < order->item_count; i++) {
+        fprintf(fp, "%s (x%d)%s",
+                order->items[i].item_name,
+                order->items[i].quantity,
+                (i == order->item_count - 1) ? "" : "; ");
+    }
+    fprintf(fp, "\n");
+
+    fclose(fp);
+    return true;
+}
+
+void storage_print_transaction_history(const char *filepath) {
+    FILE *fp = fopen(filepath, "r");
+    if (!fp) {
+        printf("  [No transaction records found]\n");
+        return;
+    }
+
+    printf("\n" ANSI_BOLD ANSI_CYAN "%-20s %-8s %-12s %-14s %-10s %-12s %s" ANSI_RESET "\n",
+           "Timestamp", "Order#", "Cashier", "Customer", "Total", "Method", "Items");
+    printf("-------------------------------------------------------------------------------------------------------\n");
+
+    char line[1024];
+    while (fgets(line, sizeof(line), fp)) {
+        utils_trim(line);
+        if (strlen(line) == 0) continue;
+
+        char ts[32] = {0}, cashier[32] = {0}, phone[32] = {0}, method[32] = {0};
+        char items[512] = {0};
+        int order_id = 0;
+        double total = 0.0;
+
+        char *t = strtok(line, "|");
+        if (t) strncpy(ts, t, sizeof(ts) - 1);
+        t = strtok(NULL, "|");
+        if (t) order_id = atoi(t);
+        t = strtok(NULL, "|");
+        if (t) strncpy(cashier, t, sizeof(cashier) - 1);
+        t = strtok(NULL, "|");
+        if (t) strncpy(phone, t, sizeof(phone) - 1);
+        t = strtok(NULL, "|");
+        if (t) total = atof(t);
+        t = strtok(NULL, "|");
+        if (t) strncpy(method, t, sizeof(method) - 1);
+        t = strtok(NULL, "|");
+        if (t) strncpy(items, t, sizeof(items) - 1);
+
+        char total_buf[16];
+        utils_format_currency(total, total_buf, sizeof(total_buf));
+
+        printf("%-20s %-8d %-12s %-14s %-10s %-12s %s\n",
+               ts, order_id, cashier, phone, total_buf, method, items);
+    }
+
+    printf("-------------------------------------------------------------------------------------------------------\n");
+    fclose(fp);
+}
