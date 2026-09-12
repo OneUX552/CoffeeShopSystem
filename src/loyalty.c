@@ -2,9 +2,13 @@
 #include "utils.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 static Customer s_customers[MAX_CUSTOMERS];
 static int s_customer_count = 0;
+
+static Coupon s_coupons[MAX_COUPONS];
+static int s_coupon_count = 0;
 
 void loyalty_init(void) {
     s_customer_count = 0;
@@ -104,9 +108,6 @@ void loyalty_print_customers(void) {
     printf("------------------------------------------------------------------------------------\n");
 }
 
-static Coupon s_coupons[MAX_COUPONS];
-static int s_coupon_count = 0;
-
 void coupon_init(void) {
     s_coupon_count = 0;
     memset(s_coupons, 0, sizeof(s_coupons));
@@ -147,25 +148,31 @@ const Coupon *coupon_find(const char *code) {
 
 double coupon_validate_and_apply(const char *code, double subtotal, char *err_msg, size_t err_size) {
     if (!code || strlen(code) == 0) {
-        if (err_msg) snprintf(err_msg, err_size, "No promo code provided.");
+        if (err_msg && err_size > 0) snprintf(err_msg, err_size, "No promo code provided.");
         return 0.0;
     }
     const Coupon *c = coupon_find(code);
     if (!c) {
-        if (err_msg) snprintf(err_msg, err_size, "Invalid coupon code '%s'.", code);
+        if (err_msg && err_size > 0) snprintf(err_msg, err_size, "Invalid coupon code '%s'.", code);
         return 0.0;
     }
     if (!c->active) {
-        if (err_msg) snprintf(err_msg, err_size, "Coupon '%s' has expired.", code);
+        if (err_msg && err_size > 0) snprintf(err_msg, err_size, "Coupon '%s' has expired.", code);
         return 0.0;
     }
     if (subtotal < c->min_order_value) {
-        if (err_msg) snprintf(err_msg, err_size, "Coupon requires minimum spend of $%.2f.", c->min_order_value);
+        if (err_msg && err_size > 0) snprintf(err_msg, err_size, "Coupon requires minimum spend of $%.2f.", c->min_order_value);
         return 0.0;
     }
 
-    double discount = subtotal * (c->discount_percent / 100.0);
-    if (err_msg) snprintf(err_msg, err_size, "Promo code '%s' applied: %.0f%% off!", c->code, c->discount_percent);
+    // Calculate and round discount to nearest cent
+    double discount = ((int)((subtotal * (c->discount_percent / 100.0) * 100.0) + 0.5)) / 100.0;
+    if (discount > subtotal) {
+        discount = subtotal;
+    }
+    if (err_msg && err_size > 0) {
+        snprintf(err_msg, err_size, "Promo code '%s' applied: %.0f%% off!", c->code, c->discount_percent);
+    }
     return discount;
 }
 
