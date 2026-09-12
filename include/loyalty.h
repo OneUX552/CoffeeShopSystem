@@ -16,3 +16,12 @@ const char *loyalty_tier_to_string(LoyaltyTier tier);
 void loyalty_print_customers(void);
 
 #endif // LOYALTY_H
+
+// Coupon promotional features
+void coupon_init(void);
+int coupon_get_count(void);
+const Coupon *coupon_get_all(int *out_count);
+bool coupon_add(const Coupon *coupon);
+const Coupon *coupon_find(const char *code);
+double coupon_validate_and_apply(const char *code, double subtotal, char *err_msg, size_t err_size);
+void coupon_print_all(void);

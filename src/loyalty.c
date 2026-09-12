@@ -103,3 +103,83 @@ void loyalty_print_customers(void) {
     }
     printf("------------------------------------------------------------------------------------\n");
 }
+
+static Coupon s_coupons[MAX_COUPONS];
+static int s_coupon_count = 0;
+
+void coupon_init(void) {
+    s_coupon_count = 0;
+    memset(s_coupons, 0, sizeof(s_coupons));
+}
+
+int coupon_get_count(void) {
+    return s_coupon_count;
+}
+
+const Coupon *coupon_get_all(int *out_count) {
+    if (out_count) {
+        *out_count = s_coupon_count;
+    }
+    return s_coupons;
+}
+
+bool coupon_add(const Coupon *coupon) {
+    if (!coupon || s_coupon_count >= MAX_COUPONS) {
+        return false;
+    }
+    if (coupon_find(coupon->code) != NULL) {
+        return false;
+    }
+    s_coupons[s_coupon_count] = *coupon;
+    s_coupon_count++;
+    return true;
+}
+
+const Coupon *coupon_find(const char *code) {
+    if (!code) return NULL;
+    for (int i = 0; i < s_coupon_count; i++) {
+        if (utils_strcasecmp(s_coupons[i].code, code) == 0) {
+            return &s_coupons[i];
+        }
+    }
+    return NULL;
+}
+
+double coupon_validate_and_apply(const char *code, double subtotal, char *err_msg, size_t err_size) {
+    if (!code || strlen(code) == 0) {
+        if (err_msg) snprintf(err_msg, err_size, "No promo code provided.");
+        return 0.0;
+    }
+    const Coupon *c = coupon_find(code);
+    if (!c) {
+        if (err_msg) snprintf(err_msg, err_size, "Invalid coupon code '%s'.", code);
+        return 0.0;
+    }
+    if (!c->active) {
+        if (err_msg) snprintf(err_msg, err_size, "Coupon '%s' has expired.", code);
+        return 0.0;
+    }
+    if (subtotal < c->min_order_value) {
+        if (err_msg) snprintf(err_msg, err_size, "Coupon requires minimum spend of $%.2f.", c->min_order_value);
+        return 0.0;
+    }
+
+    double discount = subtotal * (c->discount_percent / 100.0);
+    if (err_msg) snprintf(err_msg, err_size, "Promo code '%s' applied: %.0f%% off!", c->code, c->discount_percent);
+    return discount;
+}
+
+void coupon_print_all(void) {
+    printf("\n" ANSI_BOLD ANSI_CYAN "%-16s %-16s %-16s %-10s" ANSI_RESET "\n",
+           "Coupon Code", "Discount (%)", "Min Order ($)", "Status");
+    printf("------------------------------------------------------------\n");
+    for (int i = 0; i < s_coupon_count; i++) {
+        const Coupon *c = &s_coupons[i];
+        printf("%-16s %-16.1f $%-15.2f %-10s\n",
+               c->code,
+               c->discount_percent,
+               c->min_order_value,
+               c->active ? (ANSI_GREEN "Active" ANSI_RESET) : (ANSI_RED "Inactive" ANSI_RESET));
+    }
+    printf("------------------------------------------------------------\n");
+}
