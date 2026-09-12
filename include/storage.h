@@ -18,3 +18,7 @@ bool storage_save_menu(const char *filepath);
 bool storage_load_menu(const char *filepath);
 
 #endif // STORAGE_H
+
+// Inventory persistence
+bool storage_save_inventory(const char *filepath);
+bool storage_load_inventory(const char *filepath);

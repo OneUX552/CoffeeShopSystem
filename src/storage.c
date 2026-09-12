@@ -93,3 +93,70 @@ bool storage_load_menu(const char *filepath) {
     fclose(fp);
     return true;
 }
+
+bool storage_save_inventory(const char *filepath) {
+    FILE *fp = fopen(filepath, "w");
+    if (!fp) return false;
+
+    int count = 0;
+    const InventoryItem *items = inventory_get_items(&count);
+
+    fprintf(fp, "id,name,unit,current_stock,min_threshold,unit_cost\n");
+    for (int i = 0; i < count; i++) {
+        const InventoryItem *it = &items[i];
+        fprintf(fp, "%d,%s,%s,%.2f,%.2f,%.2f\n",
+                it->id, it->name, it->unit, it->current_stock,
+                it->min_threshold, it->unit_cost);
+    }
+
+    fclose(fp);
+    return true;
+}
+
+bool storage_load_inventory(const char *filepath) {
+    FILE *fp = fopen(filepath, "r");
+    if (!fp) return false;
+
+    char line[512];
+    if (!fgets(line, sizeof(line), fp)) {
+        fclose(fp);
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), fp)) {
+        utils_trim(line);
+        if (strlen(line) == 0) continue;
+
+        InventoryItem item;
+        memset(&item, 0, sizeof(InventoryItem));
+
+        char *token = strtok(line, ",");
+        if (!token) continue;
+        item.id = atoi(token);
+
+        token = strtok(NULL, ",");
+        if (!token) continue;
+        strncpy(item.name, token, sizeof(item.name) - 1);
+
+        token = strtok(NULL, ",");
+        if (!token) continue;
+        strncpy(item.unit, token, sizeof(item.unit) - 1);
+
+        token = strtok(NULL, ",");
+        if (!token) continue;
+        item.current_stock = atof(token);
+
+        token = strtok(NULL, ",");
+        if (!token) continue;
+        item.min_threshold = atof(token);
+
+        token = strtok(NULL, ",");
+        if (!token) continue;
+        item.unit_cost = atof(token);
+
+        inventory_add_item(&item);
+    }
+
+    fclose(fp);
+    return true;
+}
