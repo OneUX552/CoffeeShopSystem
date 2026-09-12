@@ -365,3 +365,74 @@ void storage_print_transaction_history(const char *filepath) {
     printf("-------------------------------------------------------------------------------------------------------\n");
     fclose(fp);
 }
+
+void storage_seed_defaults_if_empty(void) {
+    storage_ensure_data_dir();
+
+    // 1. Seed Menu if empty
+    if (menu_get_count() == 0) {
+        MenuItem default_menu[] = {
+            {1, "Espresso Double", CAT_HOT_COFFEE, 2.75, "Rich double shot of artisan espresso", {{1, 18.0}, {6, 1.0}}, 2, true},
+            {2, "Caffe Americano", CAT_HOT_COFFEE, 3.25, "Espresso topped with hot water", {{1, 18.0}, {6, 1.0}}, 2, true},
+            {3, "Classic Cafe Latte", CAT_HOT_COFFEE, 4.50, "Espresso with steamed milk & microfoam", {{1, 18.0}, {2, 220.0}, {6, 1.0}}, 3, true},
+            {4, "Cappuccino", CAT_HOT_COFFEE, 4.25, "Equal parts espresso, steamed milk, & foam", {{1, 18.0}, {2, 150.0}, {6, 1.0}}, 3, true},
+            {5, "Nitro Cold Brew", CAT_ICED_COFFEE, 4.75, "Slow-steeped craft cold brew infused with nitrogen", {{1, 25.0}, {6, 1.0}}, 2, true},
+            {6, "Iced Caramel Macchiato", CAT_ICED_COFFEE, 5.25, "Espresso over vanilla milk & caramel drizzle", {{1, 18.0}, {2, 200.0}, {4, 20.0}, {5, 15.0}, {6, 1.0}}, 5, true},
+            {7, "Matcha Green Tea Latte", CAT_TEA, 4.50, "Ceremonial Japanese matcha whisked with milk", {{2, 220.0}, {6, 1.0}}, 2, true},
+            {8, "Earl Grey Supreme Tea", CAT_TEA, 3.50, "Organic black tea with bergamot essence", {{6, 1.0}}, 1, true},
+            {9, "Almond Croissant", CAT_PASTRY, 3.75, "Freshly baked flaky butter croissant with almond cream", {{7, 1.0}}, 1, true},
+            {10, "Blueberry Scone", CAT_PASTRY, 3.25, "Tender bakery scone studded with wild blueberries", {{7, 1.0}}, 1, true},
+            {11, "Artisan Ceramic Mug", CAT_MERCH, 14.00, "Handmade ceramic coffee mug with shop logo", {{0, 0}}, 0, true}
+        };
+
+        for (size_t i = 0; i < sizeof(default_menu) / sizeof(default_menu[0]); i++) {
+            menu_add_item(&default_menu[i]);
+        }
+        storage_save_menu(MENU_FILE);
+    }
+
+    // 2. Seed Inventory if empty
+    if (inventory_get_count() == 0) {
+        InventoryItem default_inv[] = {
+            {1, "Espresso Beans (Arabica)", "g", 5000.0, 500.0, 0.03},
+            {2, "Whole Milk", "ml", 15000.0, 2000.0, 0.003},
+            {3, "Oat Milk (Barista)", "ml", 8000.0, 1500.0, 0.005},
+            {4, "Vanilla Syrup", "ml", 2000.0, 300.0, 0.02},
+            {5, "Caramel Sauce", "ml", 1500.0, 250.0, 0.025},
+            {6, "Recyclable Cups (12oz)", "pcs", 300.0, 50.0, 0.15},
+            {7, "Bakery Pastries", "pcs", 40.0, 8.0, 1.20}
+        };
+
+        for (size_t i = 0; i < sizeof(default_inv) / sizeof(default_inv[0]); i++) {
+            inventory_add_item(&default_inv[i]);
+        }
+        storage_save_inventory(INVENTORY_FILE);
+    }
+
+    // 3. Seed Coupons if empty
+    if (coupon_get_count() == 0) {
+        Coupon default_coupons[] = {
+            {"WELCOME10", 10.0, 5.0, true},
+            {"COFFEE5", 5.0, 0.0, true},
+            {"VIP20", 20.0, 25.0, true}
+        };
+
+        for (size_t i = 0; i < sizeof(default_coupons) / sizeof(default_coupons[0]); i++) {
+            coupon_add(&default_coupons[i]);
+        }
+        storage_save_coupons(COUPONS_FILE);
+    }
+
+    // 4. Seed sample loyalty customers if empty
+    if (loyalty_get_customer_count() == 0) {
+        loyalty_register_customer("555-0101", "Alice Vance");
+        Customer *c1 = loyalty_find_customer("555-0101");
+        if (c1) { c1->points = 145; c1->tier = TIER_SILVER; c1->total_spent = 145.50; c1->visit_count = 18; }
+
+        loyalty_register_customer("555-0102", "Bob Smith");
+        Customer *c2 = loyalty_find_customer("555-0102");
+        if (c2) { c2->points = 320; c2->tier = TIER_GOLD; c2->total_spent = 340.00; c2->visit_count = 42; }
+
+        storage_save_customers(CUSTOMERS_FILE);
+    }
+}

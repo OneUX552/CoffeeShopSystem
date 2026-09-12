@@ -32,3 +32,5 @@ bool storage_load_coupons(const char *filepath);
 // Transaction logging
 bool storage_log_transaction(const Order *order, const char *filepath);
 void storage_print_transaction_history(const char *filepath);
+
+void storage_seed_defaults_if_empty(void);
