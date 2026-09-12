@@ -1,0 +1,20 @@
+#ifndef STORAGE_H
+#define STORAGE_H
+
+#include "models.h"
+#include <stdbool.h>
+
+#define DATA_DIR "data"
+#define MENU_FILE "data/menu.csv"
+#define INVENTORY_FILE "data/inventory.csv"
+#define CUSTOMERS_FILE "data/customers.csv"
+#define COUPONS_FILE "data/coupons.csv"
+#define TRANSACTIONS_FILE "data/transactions.log"
+
+bool storage_ensure_data_dir(void);
+
+// Menu persistence
+bool storage_save_menu(const char *filepath);
+bool storage_load_menu(const char *filepath);
+
+#endif // STORAGE_H
