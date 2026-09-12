@@ -98,3 +98,30 @@ void order_print_summary(const Order *order) {
     }
     printf("-----------------------------------------------------------\n");
 }
+
+double order_calculate_subtotal(Order *order) {
+    if (!order) return 0.0;
+    double subtotal = 0.0;
+    for (int i = 0; i < order->item_count; i++) {
+        subtotal += order->items[i].line_total;
+    }
+    order->subtotal = subtotal;
+    return subtotal;
+}
+
+void order_calculate_totals(Order *order, double discount_amount) {
+    if (!order) return;
+    order_calculate_subtotal(order);
+
+    if (discount_amount > order->subtotal) {
+        discount_amount = order->subtotal;
+    }
+    if (discount_amount < 0.0) {
+        discount_amount = 0.0;
+    }
+
+    order->discount_amount = discount_amount;
+    double taxable_amount = order->subtotal - order->discount_amount;
+    order->tax_amount = taxable_amount * SALES_TAX_RATE;
+    order->total_amount = taxable_amount + order->tax_amount;
+}
