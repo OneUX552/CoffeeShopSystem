@@ -116,3 +116,36 @@ void utils_pause(void) {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) {}
 }
+#include <termios.h>
+#include <unistd.h>
+
+bool utils_read_password(const char *prompt, char *buffer, size_t max_len) {
+    if (prompt) {
+        printf("%s", prompt);
+        fflush(stdout);
+    }
+
+    struct termios old_term, new_term;
+    bool is_tty = isatty(STDIN_FILENO);
+
+    if (is_tty) {
+        if (tcgetattr(STDIN_FILENO, &old_term) != 0) {
+            return utils_read_string(NULL, buffer, max_len);
+        }
+        new_term = old_term;
+        new_term.c_lflag &= ~(ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &new_term);
+    }
+
+    bool ok = (fgets(buffer, (int)max_len, stdin) != NULL);
+
+    if (is_tty) {
+        tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
+        printf("\n");
+    }
+
+    if (ok) {
+        utils_trim(buffer);
+    }
+    return ok;
+}

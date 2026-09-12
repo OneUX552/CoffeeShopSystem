@@ -27,3 +27,5 @@ void utils_print_header(const char *title);
 void utils_pause(void);
 
 #endif // UTILS_H
+
+bool utils_read_password(const char *prompt, char *buffer, size_t max_len);
