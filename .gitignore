@@ -1,0 +1,15 @@
+# Binaries and object files
+*.o
+*.out
+coffeeshop
+test_runner
+
+# Build directories
+build/
+bin/
+
+# Temporary and editor files
+*.swp
+*~
+.DS_Store
+*.tmp
