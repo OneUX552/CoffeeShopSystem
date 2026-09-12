@@ -22,3 +22,9 @@ bool storage_load_menu(const char *filepath);
 // Inventory persistence
 bool storage_save_inventory(const char *filepath);
 bool storage_load_inventory(const char *filepath);
+
+// Customer and Coupon persistence
+bool storage_save_customers(const char *filepath);
+bool storage_load_customers(const char *filepath);
+bool storage_save_coupons(const char *filepath);
+bool storage_load_coupons(const char *filepath);

@@ -160,3 +160,132 @@ bool storage_load_inventory(const char *filepath) {
     fclose(fp);
     return true;
 }
+
+bool storage_save_customers(const char *filepath) {
+    FILE *fp = fopen(filepath, "w");
+    if (!fp) return false;
+
+    int count = 0;
+    const Customer *customers = loyalty_get_customers(&count);
+
+    fprintf(fp, "phone,name,points,tier,total_spent,visit_count\n");
+    for (int i = 0; i < count; i++) {
+        const Customer *c = &customers[i];
+        fprintf(fp, "%s,%s,%d,%d,%.2f,%d\n",
+                c->phone, c->name, c->points, (int)c->tier,
+                c->total_spent, c->visit_count);
+    }
+
+    fclose(fp);
+    return true;
+}
+
+bool storage_load_customers(const char *filepath) {
+    FILE *fp = fopen(filepath, "r");
+    if (!fp) return false;
+
+    char line[512];
+    if (!fgets(line, sizeof(line), fp)) {
+        fclose(fp);
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), fp)) {
+        utils_trim(line);
+        if (strlen(line) == 0) continue;
+
+        char phone[MAX_PHONE_LEN] = {0};
+        char name[MAX_NAME_LEN] = {0};
+        int points = 0, tier_int = 0, visits = 0;
+        double total_spent = 0.0;
+
+        char *token = strtok(line, ",");
+        if (!token) continue;
+        strncpy(phone, token, sizeof(phone) - 1);
+
+        token = strtok(NULL, ",");
+        if (!token) continue;
+        strncpy(name, token, sizeof(name) - 1);
+
+        token = strtok(NULL, ",");
+        if (token) points = atoi(token);
+
+        token = strtok(NULL, ",");
+        if (token) tier_int = atoi(token);
+
+        token = strtok(NULL, ",");
+        if (token) total_spent = atof(token);
+
+        token = strtok(NULL, ",");
+        if (token) visits = atoi(token);
+
+        loyalty_register_customer(phone, name);
+        Customer *c = loyalty_find_customer(phone);
+        if (c) {
+            c->points = points;
+            c->tier = (LoyaltyTier)tier_int;
+            c->total_spent = total_spent;
+            c->visit_count = visits;
+        }
+    }
+
+    fclose(fp);
+    return true;
+}
+
+bool storage_save_coupons(const char *filepath) {
+    FILE *fp = fopen(filepath, "w");
+    if (!fp) return false;
+
+    int count = 0;
+    const Coupon *coupons = coupon_get_all(&count);
+
+    fprintf(fp, "code,discount_percent,min_order_value,active\n");
+    for (int i = 0; i < count; i++) {
+        const Coupon *c = &coupons[i];
+        fprintf(fp, "%s,%.2f,%.2f,%d\n",
+                c->code, c->discount_percent, c->min_order_value, c->active ? 1 : 0);
+    }
+
+    fclose(fp);
+    return true;
+}
+
+bool storage_load_coupons(const char *filepath) {
+    FILE *fp = fopen(filepath, "r");
+    if (!fp) return false;
+
+    char line[512];
+    if (!fgets(line, sizeof(line), fp)) {
+        fclose(fp);
+        return false;
+    }
+
+    while (fgets(line, sizeof(line), fp)) {
+        utils_trim(line);
+        if (strlen(line) == 0) continue;
+
+        Coupon c;
+        memset(&c, 0, sizeof(Coupon));
+
+        char *token = strtok(line, ",");
+        if (!token) continue;
+        strncpy(c.code, token, sizeof(c.code) - 1);
+
+        token = strtok(NULL, ",");
+        if (!token) continue;
+        c.discount_percent = atof(token);
+
+        token = strtok(NULL, ",");
+        if (!token) continue;
+        c.min_order_value = atof(token);
+
+        token = strtok(NULL, ",");
+        c.active = token ? (atoi(token) != 0) : true;
+
+        coupon_add(&c);
+    }
+
+    fclose(fp);
+    return true;
+}
