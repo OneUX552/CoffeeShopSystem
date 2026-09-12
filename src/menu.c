@@ -23,6 +23,7 @@ const MenuItem *menu_get_items(int *out_count) {
 }
 
 const MenuItem *menu_find_by_id(int id) {
+    if (id <= 0) return NULL;
     for (int i = 0; i < s_menu_count; i++) {
         if (s_menu_items[i].id == id) {
             return &s_menu_items[i];

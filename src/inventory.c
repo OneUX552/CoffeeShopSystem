@@ -23,6 +23,7 @@ const InventoryItem *inventory_get_items(int *out_count) {
 }
 
 InventoryItem *inventory_find_by_id(int id) {
+    if (id <= 0) return NULL;
     for (int i = 0; i < s_inventory_count; i++) {
         if (s_inventory[i].id == id) {
             return &s_inventory[i];
