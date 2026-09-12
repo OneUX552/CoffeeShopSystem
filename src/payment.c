@@ -47,3 +47,70 @@ const char *payment_method_to_string(PaymentMethod method) {
         default:             return "Unknown";
     }
 }
+#include "utils.h"
+
+void payment_format_receipt(const Order *order, char *buffer, size_t max_len) {
+    if (!order || !buffer || max_len == 0) return;
+
+    char sub_buf[16], disc_buf[16], tax_buf[16], tot_buf[16], tend_buf[16], chg_buf[16];
+    utils_format_currency(order->subtotal, sub_buf, sizeof(sub_buf));
+    utils_format_currency(order->discount_amount, disc_buf, sizeof(disc_buf));
+    utils_format_currency(order->tax_amount, tax_buf, sizeof(tax_buf));
+    utils_format_currency(order->total_amount, tot_buf, sizeof(tot_buf));
+    utils_format_currency(order->cash_tendered, tend_buf, sizeof(tend_buf));
+    utils_format_currency(order->change_due, chg_buf, sizeof(chg_buf));
+
+    int offset = snprintf(buffer, max_len,
+        "====================================================\n"
+        "                ARTISAN COFFEE HOUSE                \n"
+        "             124 Roasted Bean Boulevard             \n"
+        "                 Tel: (555) 019-2834                \n"
+        "====================================================\n"
+        "Order #: %-6d                    Date: %s\n"
+        "Cashier: %-12s           Phone: %s\n"
+        "----------------------------------------------------\n"
+        "%-24s %-6s %-10s %-8s\n"
+        "----------------------------------------------------\n",
+        order->order_id,
+        order->timestamp,
+        order->cashier_username,
+        strlen(order->customer_phone) > 0 ? order->customer_phone : "Walk-in",
+        "Item", "Qty", "Price", "Total"
+    );
+
+    for (int i = 0; i < order->item_count && offset < (int)max_len; i++) {
+        const OrderLineItem *item = &order->items[i];
+        char u_p[16], l_t[16];
+        utils_format_currency(item->unit_price, u_p, sizeof(u_p));
+        utils_format_currency(item->line_total, l_t, sizeof(l_t));
+
+        offset += snprintf(buffer + offset, max_len - offset,
+            "%-24s %-6d %-10s %-8s\n",
+            item->item_name, item->quantity, u_p, l_t);
+    }
+
+    snprintf(buffer + offset, max_len - offset,
+        "----------------------------------------------------\n"
+        "Subtotal:                                  %10s\n"
+        "Discount:                                 -%10s\n"
+        "Sales Tax (8.25%%):                         %10s\n"
+        "TOTAL:                                     %10s\n"
+        "Payment Method:                            %10s\n"
+        "Amount Tendered:                           %10s\n"
+        "Change Due:                                %10s\n"
+        "====================================================\n"
+        "       Thank you for visiting Artisan Coffee!       \n"
+        "                Have a wonderful day!               \n"
+        "====================================================\n",
+        sub_buf, disc_buf, tax_buf, tot_buf,
+        payment_method_to_string(order->payment_method),
+        tend_buf, chg_buf
+    );
+}
+
+void payment_print_receipt(const Order *order) {
+    if (!order) return;
+    char buffer[2048];
+    payment_format_receipt(order, buffer, sizeof(buffer));
+    printf(ANSI_CYAN "%s" ANSI_RESET, buffer);
+}

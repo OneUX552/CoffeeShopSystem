@@ -10,3 +10,6 @@ bool payment_process_mobile(Order *order, const char *transaction_ref);
 const char *payment_method_to_string(PaymentMethod method);
 
 #endif // PAYMENT_H
+
+void payment_print_receipt(const Order *order);
+void payment_format_receipt(const Order *order, char *buffer, size_t max_len);
