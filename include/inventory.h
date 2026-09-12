@@ -16,7 +16,7 @@ int inventory_get_low_stock_count(void);
 void inventory_print_stock(void);
 void inventory_print_alerts(void);
 
-// Recipe consumption helpers
+// Recipe consumption helpers (e.g., standard double-shot espresso requires ~18.0g of coffee beans)
 bool inventory_can_prepare_item(const MenuItem *item, int quantity);
 bool inventory_consume_for_item(const MenuItem *item, int quantity);
 
