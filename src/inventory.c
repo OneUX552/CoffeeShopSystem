@@ -114,3 +114,27 @@ void inventory_print_alerts(void) {
         }
     }
 }
+
+bool inventory_can_prepare_item(const MenuItem *item, int quantity) {
+    if (!item || quantity <= 0) return false;
+    for (int i = 0; i < item->recipe_count; i++) {
+        int inv_id = item->recipe[i].inventory_id;
+        double needed = item->recipe[i].quantity * (double)quantity;
+        if (!inventory_has_sufficient_stock(inv_id, needed)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool inventory_consume_for_item(const MenuItem *item, int quantity) {
+    if (!inventory_can_prepare_item(item, quantity)) {
+        return false;
+    }
+    for (int i = 0; i < item->recipe_count; i++) {
+        int inv_id = item->recipe[i].inventory_id;
+        double needed = item->recipe[i].quantity * (double)quantity;
+        inventory_deduct(inv_id, needed);
+    }
+    return true;
+}
