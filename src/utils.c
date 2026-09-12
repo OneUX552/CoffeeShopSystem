@@ -20,9 +20,20 @@ void utils_get_timestamp(char *buffer, size_t max_len) {
 
 void utils_trim(char *str) {
     if (!str) return;
+    
+    // Trim trailing whitespace and newlines
     size_t len = strlen(str);
     while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r' || isspace((unsigned char)str[len - 1]))) {
         str[--len] = '\0';
+    }
+
+    // Trim leading whitespace
+    size_t start = 0;
+    while (str[start] != '\0' && isspace((unsigned char)str[start])) {
+        start++;
+    }
+    if (start > 0) {
+        memmove(str, str + start, len - start + 1);
     }
 }
 
